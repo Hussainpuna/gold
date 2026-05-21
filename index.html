@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Daily gold rate dashboard for Dubai and Banswara with live spot-derived 24K, 22K, and 18K prices.">
+  <title>Daily Gold Rates | Dubai and Banswara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --paper: #f6f5f0;
+      --panel: #ffffff;
+      --panel-soft: #fbfaf7;
+      --ink: #171816;
+      --muted: #646a65;
+      --line: #dedbd2;
+      --gold: #c6922d;
+      --gold-deep: #8b641a;
+      --green: #14675f;
+      --green-soft: #dcefed;
+      --brick: #8a463b;
+      --shadow: 0 18px 50px rgba(29, 24, 12, 0.12);
+      --radius: 8px;
+      --radius-small: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(20, 103, 95, 0.08), transparent 38%),
+        linear-gradient(315deg, rgba(198, 146, 45, 0.12), transparent 42%),
+        var(--paper);
+      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 36px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 48px;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--ink);
+      color: #f8e2a6;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .brand-copy strong {
+      font-size: 15px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .brand-copy span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.68);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(198, 146, 45, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .status-pill.is-live .status-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(20, 103, 95, 0.17);
+    }
+
+    .status-pill.is-error .status-dot {
+      background: var(--brick);
+      box-shadow: 0 0 0 4px rgba(138, 70, 59, 0.16);
+    }
+
+    .button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 15px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      box-shadow: 0 10px 24px rgba(23, 24, 22, 0.17);
+      white-space: nowrap;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      background: #000;
+    }
+
+    .button:disabled {
+      cursor: wait;
+      transform: none;
+      opacity: 0.72;
+    }
+
+    .button svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.4;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .hero-copy {
+      min-height: 310px;
+      padding: clamp(22px, 4vw, 40px);
+      border: 1px solid rgba(23, 24, 22, 0.08);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.76)),
+        linear-gradient(120deg, rgba(20, 103, 95, 0.08), rgba(198, 146, 45, 0.13));
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 26px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      margin-bottom: 16px;
+      padding: 7px 10px;
+      border: 1px solid rgba(20, 103, 95, 0.18);
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 720px;
+      font-family: Newsreader, Georgia, serif;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: 0.9;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      width: min(620px, 100%);
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 18px);
+      line-height: 1.55;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-metric {
+      min-height: 92px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: rgba(255, 255, 255, 0.72);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .mini-metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .mini-metric strong {
+      display: block;
+      font-size: clamp(18px, 2.5vw, 25px);
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .hero-media {
+      position: relative;
+      min-height: 310px;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background-image:
+        linear-gradient(180deg, rgba(23, 24, 22, 0.1), rgba(23, 24, 22, 0.76)),
+        url("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/West_Point_gold.jpg/1280px-West_Point_gold.jpg");
+      background-size: cover;
+      background-position: center;
+      box-shadow: var(--shadow);
+      color: #fff;
+      display: flex;
+      align-items: end;
+    }
+
+    .hero-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(130deg, rgba(20, 103, 95, 0.2), rgba(198, 146, 45, 0.18));
+      pointer-events: none;
+    }
+
+    .media-caption {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+    }
+
+    .media-caption span {
+      display: block;
+      max-width: 270px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .live-price {
+      text-align: right;
+      min-width: 150px;
+    }
+
+    .live-price small {
+      display: block;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .live-price strong {
+      display: block;
+      margin-top: 5px;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1;
+    }
+
+    .notice {
+      margin-bottom: 16px;
+      padding: 13px 15px;
+      border: 1px solid rgba(139, 100, 26, 0.2);
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius-small);
+      background: rgba(255, 255, 255, 0.72);
+      color: #514936;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .market-card {
+      border: 1px solid rgba(23, 24, 22, 0.08);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .market-head {
+      padding: 22px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgba(20, 103, 95, 0.08), transparent 45%),
+        var(--panel-soft);
+    }
+
+    .market-title {
+      min-width: 0;
+    }
+
+    .market-title h2 {
+      margin: 0;
+      font-size: clamp(25px, 3vw, 34px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .market-title p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .market-badge {
+      align-self: flex-start;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .main-rate {
+      padding: 20px 22px 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .rate-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .rate-value {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .rate-value strong {
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .rate-value span {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .settings-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 0 22px 20px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel-soft);
+    }
+
+    .input-wrap input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .input-wrap span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .local-time {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: var(--radius-small);
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .local-time svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .rate-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .rate-table th,
+    .rate-table td {
+      padding: 15px 22px;
+      text-align: left;
+      border-top: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .rate-table th {
+      color: var(--muted);
+      background: var(--panel-soft);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .rate-table td {
+      font-size: 14px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .rate-table td:first-child {
+      color: var(--gold-deep);
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: #faf8f2;
+    }
+
+    .meta-item {
+      padding: 15px 18px;
+      border-right: 1px solid var(--line);
+      min-width: 0;
+    }
+
+    .meta-item:last-child {
+      border-right: 0;
+    }
+
+    .meta-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      margin-bottom: 5px;
+    }
+
+    .meta-item strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      margin-top: 18px;
+      padding: 18px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .footer a {
+      color: var(--green);
+      font-weight: 700;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .skeleton {
+      position: relative;
+      overflow: hidden;
+      color: transparent !important;
+      border-radius: 4px;
+      background: #e8e4da;
+    }
+
+    .skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .market-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy,
+      .hero-media {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .shell {
+        width: min(100% - 22px, 1180px);
+        padding-top: 14px;
+      }
+
+      .topbar,
+      .actions,
+      .footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .status-pill,
+      .button {
+        width: 100%;
+      }
+
+      .brand-copy strong,
+      .brand-copy span {
+        white-space: normal;
+      }
+
+      .hero-copy {
+        padding: 22px;
+      }
+
+      .hero-metrics,
+      .meta-grid,
+      .settings-row {
+        grid-template-columns: 1fr;
+      }
+
+      .media-caption {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .live-price {
+        text-align: left;
+      }
+
+      .market-head {
+        flex-direction: column;
+      }
+
+      .market-badge {
+        align-self: flex-start;
+      }
+
+      .rate-table th,
+      .rate-table td {
+        padding: 12px 14px;
+        font-size: 12px;
+      }
+
+      .rate-table th:nth-child(4),
+      .rate-table td:nth-child(4) {
+        display: none;
+      }
+
+      .meta-item {
+        border-right: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .meta-item:first-child {
+        border-top: 0;
+      }
+
+      .footer-links {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Daily Gold Rates">
+        <div class="brand-mark" aria-hidden="true">
+          <i data-lucide="gem"></i>
+        </div>
+        <div class="brand-copy">
+          <strong>Daily Gold Rates</strong>
+          <span>Dubai and Banswara</span>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="status-pill" id="statusPill" role="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="statusText">Loading live rates</span>
+        </div>
+        <button class="button" id="refreshButton" type="button" aria-label="Refresh gold rates">
+          <i data-lucide="refresh-cw"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="hero-copy">
+        <div>
+          <div class="eyebrow">
+            <i data-lucide="activity"></i>
+            Daily spot tracker
+          </div>
+          <h1 id="pageTitle">Gold rates for two markets.</h1>
+          <p class="lead">Current spot-derived prices for Dubai in AED and Banswara in INR, calculated per gram and per 10 grams across common purities.</p>
+        </div>
+        <div class="hero-metrics" aria-label="Market summary">
+          <div class="mini-metric">
+            <span>Gold spot</span>
+            <strong id="spotMetric" class="skeleton">Loading</strong>
+          </div>
+          <div class="mini-metric">
+            <span>Dubai 24K</span>
+            <strong id="dubaiMetric" class="skeleton">Loading</strong>
+          </div>
+          <div class="mini-metric">
+            <span>Banswara 24K</span>
+            <strong id="banswaraMetric" class="skeleton">Loading</strong>
+          </div>
+        </div>
+      </div>
+      <aside class="hero-media" aria-label="Gold bars">
+        <div class="media-caption">
+          <span id="syncText">Syncing latest gold and currency data.</span>
+          <div class="live-price">
+            <small>XAU/USD</small>
+            <strong id="heroSpot" class="skeleton">Loading</strong>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="notice" id="notice">
+      Prices are indicative market estimates from live gold spot and currency conversion. Jewellery counters may add making charges, wastage, premiums, GST or VAT.
+    </div>
+
+    <section class="market-grid" id="marketGrid" aria-label="Gold rate cards"></section>
+
+    <footer class="footer">
+      <div>Rates convert one troy ounce to grams using 31.1034768 g/oz. Cached data is used only when live fetching is unavailable.</div>
+      <div class="footer-links">
+        <a href="https://gold-api.com/docs" target="_blank" rel="noreferrer">Gold API</a>
+        <a href="https://open.er-api.com/v6/latest/USD" target="_blank" rel="noreferrer">Exchange rates</a>
+        <a href="https://commons.wikimedia.org/wiki/File:West_Point_gold.jpg" target="_blank" rel="noreferrer">Image credit</a>
+      </div>
+    </footer>
+  </main>
+
+  <template id="marketTemplate">
+    <article class="market-card">
+      <div class="market-head">
+        <div class="market-title">
+          <h2 data-field="name"></h2>
+          <p data-field="subtitle"></p>
+        </div>
+        <div class="market-badge" data-field="badge"></div>
+      </div>
+      <div class="main-rate">
+        <div class="rate-label">24K spot rate</div>
+        <div class="rate-value">
+          <strong data-field="mainRate" class="skeleton">Loading</strong>
+          <span>per gram</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label data-field="adjustmentLabel"></label>
+          <div class="input-wrap">
+            <input data-field="adjustmentInput" type="number" min="0" max="40" step="0.1" inputmode="decimal">
+            <span>%</span>
+          </div>
+        </div>
+        <div class="local-time">
+          <i data-lucide="clock-3"></i>
+          <span data-field="localTime">--</span>
+        </div>
+      </div>
+      <table class="rate-table">
+        <thead>
+          <tr>
+            <th>Purity</th>
+            <th>Per gram</th>
+            <th>Per 10g</th>
+            <th data-field="retailHeader">With add-on</th>
+          </tr>
+        </thead>
+        <tbody data-field="tableBody"></tbody>
+      </table>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span>Currency</span>
+          <strong data-field="currency"></strong>
+        </div>
+        <div class="meta-item">
+          <span>FX rate</span>
+          <strong data-field="fxRate"></strong>
+        </div>
+        <div class="meta-item">
+          <span>Updated</span>
+          <strong data-field="updated"></strong>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const TROY_OUNCE_GRAMS = 31.1034768;
+    const GOLD_API_URL = "https://api.gold-api.com/price/XAU";
+    const FX_API_URL = "https://open.er-api.com/v6/latest/USD";
+    const CACHE_KEY = "daily-gold-rates-cache-v1";
+    const ADJUSTMENT_KEY = "daily-gold-rates-adjustments-v1";
+
+    const markets = [
+      {
+        id: "dubai",
+        name: "Dubai",
+        subtitle: "Dubai, United Arab Emirates",
+        currency: "AED",
+        locale: "en-AE",
+        timeZone: "Asia/Dubai",
+        addOnLabel: "VAT or local add-on",
+        defaultAdjustment: 5
+      },
+      {
+        id: "banswara",
+        name: "Banswara",
+        subtitle: "Banswara, Rajasthan, India",
+        currency: "INR",
+        locale: "en-IN",
+        timeZone: "Asia/Kolkata",
+        addOnLabel: "GST or local add-on",
+        defaultAdjustment: 3
+      }
+    ];
+
+    const purities = [
+      { label: "24K", ratio: 24 / 24 },
+      { label: "22K", ratio: 22 / 24 },
+      { label: "18K", ratio: 18 / 24 }
+    ];
+
+    const state = {
+      gold: null,
+      fx: null,
+      fromCache: false,
+      loading: false,
+      adjustments: loadAdjustments()
+    };
+
+    const els = {
+      statusPill: document.querySelector("#statusPill"),
+      statusText: document.querySelector("#statusText"),
+      refreshButton: document.querySelector("#refreshButton"),
+      spotMetric: document.querySelector("#spotMetric"),
+      dubaiMetric: document.querySelector("#dubaiMetric"),
+      banswaraMetric: document.querySelector("#banswaraMetric"),
+      heroSpot: document.querySelector("#heroSpot"),
+      syncText: document.querySelector("#syncText"),
+      grid: document.querySelector("#marketGrid"),
+      template: document.querySelector("#marketTemplate")
+    };
+
+    initializeCards();
+    refreshRates();
+    setInterval(updateClocks, 30000);
+    setInterval(refreshRates, 15 * 60 * 1000);
+
+    els.refreshButton.addEventListener("click", refreshRates);
+
+    function initializeCards() {
+      els.grid.innerHTML = "";
+
+      for (const market of markets) {
+        const fragment = els.template.content.cloneNode(true);
+        const card = fragment.querySelector(".market-card");
+        card.dataset.market = market.id;
+        card.querySelector('[data-field="name"]').textContent = market.name;
+        card.querySelector('[data-field="subtitle"]').textContent = market.subtitle;
+        card.querySelector('[data-field="badge"]').textContent = market.currency;
+        card.querySelector('[data-field="adjustmentLabel"]').textContent = market.addOnLabel;
+        card.querySelector('[data-field="currency"]').textContent = market.currency;
+        card.querySelector('[data-field="retailHeader"]').textContent = "With add-on";
+
+        const input = card.querySelector('[data-field="adjustmentInput"]');
+        input.value = getAdjustment(market);
+        input.setAttribute("aria-label", `${market.name} local add-on percentage`);
+        input.addEventListener("input", () => {
+          state.adjustments[market.id] = clampAdjustment(input.value, market.defaultAdjustment);
+          saveAdjustments();
+          renderRates();
+        });
+
+        els.grid.appendChild(fragment);
+      }
+
+      updateClocks();
+      refreshIcons();
+    }
+
+    async function refreshRates() {
+      if (state.loading) return;
+
+      state.loading = true;
+      setLoading(true);
+      setStatus("loading", "Loading live rates");
+
+      try {
+        const [gold, fx] = await Promise.all([
+          fetchJson(GOLD_API_URL),
+          fetchJson(FX_API_URL)
+        ]);
+
+        if (!Number.isFinite(Number(gold.price))) {
+          throw new Error("Gold API returned an invalid price.");
+        }
+
+        if (!fx.rates || !Number.isFinite(Number(fx.rates.AED)) || !Number.isFinite(Number(fx.rates.INR))) {
+          throw new Error("Currency API returned incomplete exchange rates.");
+        }
+
+        state.gold = {
+          price: Number(gold.price),
+          updatedAt: gold.updatedAt || new Date().toISOString(),
+          currency: gold.currency || "USD"
+        };
+
+        state.fx = {
+          rates: fx.rates,
+          updatedAt: fx.time_last_update_utc || fx.time_last_update_unix || new Date().toISOString()
+        };
+
+        state.fromCache = false;
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          gold: state.gold,
+          fx: state.fx,
+          savedAt: new Date().toISOString()
+        }));
+
+        setStatus("live", "Live rates loaded");
+      } catch (error) {
+        const cached = loadCache();
+
+        if (cached) {
+          state.gold = cached.gold;
+          state.fx = cached.fx;
+          state.fromCache = true;
+          setStatus("error", "Showing cached rates");
+        } else {
+          setStatus("error", "Rates unavailable");
+          els.syncText.textContent = "Live rates could not be loaded. Check your internet connection and refresh.";
+        }
+
+        console.warn(error);
+      } finally {
+        state.loading = false;
+        setLoading(false);
+        renderRates();
+      }
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      return response.json();
+    }
+
+    function renderRates() {
+      if (!state.gold || !state.fx) return;
+
+      const xauUsd = state.gold.price;
+      const dubai24 = pricePerGram(markets[0], 1);
+      const banswara24 = pricePerGram(markets[1], 1);
+
+      els.spotMetric.textContent = formatMoney(xauUsd, "USD", "en-US", 2) + "/oz";
+      els.heroSpot.textContent = formatMoney(xauUsd, "USD", "en-US", 2);
+      els.dubaiMetric.textContent = formatMoney(dubai24, "AED", "en-AE", 2) + "/g";
+      els.banswaraMetric.textContent = formatMoney(banswara24, "INR", "en-IN", 0) + "/g";
+
+      removeSkeleton(els.spotMetric, els.heroSpot, els.dubaiMetric, els.banswaraMetric);
+
+      const syncedAt = formatDateTime(state.gold.updatedAt, "Asia/Dubai", "en-AE");
+      els.syncText.textContent = state.fromCache
+        ? `Cached market data from ${syncedAt}.`
+        : `Live market data updated ${syncedAt}.`;
+
+      for (const market of markets) {
+        renderMarket(market);
+      }
+
+      updateClocks();
+      refreshIcons();
+    }
+
+    function renderMarket(market) {
+      const card = document.querySelector(`[data-market="${market.id}"]`);
+      const adjustment = getAdjustment(market);
+      const base24 = pricePerGram(market, 1);
+
+      card.querySelector('[data-field="mainRate"]').textContent = formatMoney(base24, market.currency, market.locale, decimalsFor(market.currency));
+      removeSkeleton(card.querySelector('[data-field="mainRate"]'));
+
+      const body = card.querySelector('[data-field="tableBody"]');
+      body.innerHTML = "";
+
+      for (const purity of purities) {
+        const perGram = pricePerGram(market, purity.ratio);
+        const perTen = perGram * 10;
+        const withAddOn = perTen * (1 + adjustment / 100);
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${purity.label}</td>
+          <td>${formatMoney(perGram, market.currency, market.locale, decimalsFor(market.currency))}</td>
+          <td>${formatMoney(perTen, market.currency, market.locale, decimalsFor(market.currency))}</td>
+          <td>${formatMoney(withAddOn, market.currency, market.locale, decimalsFor(market.currency))}</td>
+        `;
+        body.appendChild(row);
+      }
+
+      const fxRate = Number(state.fx.rates[market.currency]);
+      card.querySelector('[data-field="fxRate"]').textContent = `1 USD = ${formatNumber(fxRate, market.locale, 4)} ${market.currency}`;
+      card.querySelector('[data-field="updated"]').textContent = state.fromCache
+        ? "Cached"
+        : formatDateTime(state.gold.updatedAt, market.timeZone, market.locale);
+    }
+
+    function pricePerGram(market, purityRatio) {
+      const fxRate = Number(state.fx.rates[market.currency]);
+      return (state.gold.price * fxRate / TROY_OUNCE_GRAMS) * purityRatio;
+    }
+
+    function updateClocks() {
+      for (const market of markets) {
+        const card = document.querySelector(`[data-market="${market.id}"]`);
+        if (!card) continue;
+
+        card.querySelector('[data-field="localTime"]').textContent = formatTime(new Date(), market.timeZone, market.locale);
+      }
+    }
+
+    function setLoading(isLoading) {
+      els.refreshButton.disabled = isLoading;
+      els.refreshButton.querySelector("span").textContent = isLoading ? "Refreshing" : "Refresh";
+    }
+
+    function setStatus(type, text) {
+      els.statusPill.classList.toggle("is-live", type === "live");
+      els.statusPill.classList.toggle("is-error", type === "error");
+      els.statusText.textContent = text;
+    }
+
+    function loadCache() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+
+        if (cached && cached.gold && cached.fx && cached.fx.rates) {
+          return cached;
+        }
+      } catch (error) {
+        console.warn(error);
+      }
+
+      return null;
+    }
+
+    function loadAdjustments() {
+      try {
+        return JSON.parse(localStorage.getItem(ADJUSTMENT_KEY)) || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveAdjustments() {
+      localStorage.setItem(ADJUSTMENT_KEY, JSON.stringify(state.adjustments));
+    }
+
+    function getAdjustment(market) {
+      return clampAdjustment(state.adjustments[market.id], market.defaultAdjustment);
+    }
+
+    function clampAdjustment(value, fallback) {
+      const number = Number(value);
+
+      if (!Number.isFinite(number)) {
+        return fallback;
+      }
+
+      return Math.min(40, Math.max(0, number));
+    }
+
+    function formatMoney(value, currency, locale, decimals) {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(value);
+    }
+
+    function formatNumber(value, locale, decimals) {
+      return new Intl.NumberFormat(locale, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(value);
+    }
+
+    function formatDateTime(value, timeZone, locale) {
+      return new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone
+      }).format(new Date(value));
+    }
+
+    function formatTime(value, timeZone, locale) {
+      return new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone
+      }).format(value);
+    }
+
+    function decimalsFor(currency) {
+      return currency === "INR" ? 0 : 2;
+    }
+
+    function removeSkeleton(...nodes) {
+      for (const node of nodes) {
+        if (node) node.classList.remove("skeleton");
+      }
+    }
+
+    function refreshIcons() {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+  </script>
+</body>
+</html>
